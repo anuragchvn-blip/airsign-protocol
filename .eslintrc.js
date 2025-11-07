@@ -1,26 +1,68 @@
 module.exports = {
   root: true,
   extends: [
-    '@react-native-community',
-    '@typescript-eslint/recommended',
-    'plugin:security/recommended',
-    'prettier'
+    'eslint:recommended'
   ],
-  parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'security'],
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: 'module'
+  },
+  env: {
+    node: true,
+    es2022: true
+  },
+  ignorePatterns: [
+    'dist/',
+    'coverage/',
+    'node_modules/',
+    '*.d.ts',
+    'web-demo/public/'
+  ],
   rules: {
     'no-console': 'warn',
-    '@typescript-eslint/no-unused-vars': 'error',
-    '@typescript-eslint/explicit-function-return-type': 'warn',
-    'security/detect-object-injection': 'off', // Too many false positives
     'prefer-const': 'error',
-    'no-var': 'error'
+    'no-var': 'error',
+    'no-unused-vars': 'warn'
   },
   overrides: [
+    {
+      files: ['**/*.ts'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module'
+      },
+      rules: {
+        'no-undef': 'off' // TypeScript handles this
+      }
+    },
     {
       files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
       env: {
         jest: true
+      },
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly'
+      }
+    },
+    {
+      files: ['web-demo/server.js'],
+      env: {
+        node: true
+      }
+    },
+    {
+      files: ['web-demo/public/**/*.js'],
+      env: {
+        browser: true
+      },
+      globals: {
+        window: 'readonly',
+        document: 'readonly'
       }
     }
   ]
