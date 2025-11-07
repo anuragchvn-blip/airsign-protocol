@@ -1,0 +1,48 @@
+{
+  "name": "@airsign/web-demo",
+  "version": "1.0.0", 
+  "description": "AirSign Protocol Web Demo - Shows crypto payments between browser tabs",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "prod": "HOST=0.0.0.0 PORT=80 WS_PORT=443 node server.js",
+    "local": "HOST=localhost PORT=3000 WS_PORT=3001 node server.js"
+  },
+  "files": [
+    "server.js",
+    "public",
+    "README.md"
+  ],
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  },
+  "keywords": [
+    "airsign",
+    "crypto",
+    "webrtc", 
+    "demo",
+    "web3",
+    "airdrop",
+    "p2p"
+  ],
+  "author": "AirSign Protocol Contributors",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anuragchvn-blip/airsign-protocol.git",
+    "directory": "web-demo"
+  },
+  "bugs": {
+    "url": "https://github.com/anuragchvn-blip/airsign-protocol/issues"
+  },
+  "homepage": "https://github.com/anuragchvn-blip/airsign-protocol#readme",
+  "publishConfig": {
+    "access": "public"
+  }
+}

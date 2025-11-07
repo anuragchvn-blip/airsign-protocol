@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirSign - Send Crypto Like AirDrop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .app {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .device-info {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .device-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .connection-status {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .main-controls {
+            padding: 30px;
+        }
+        
+        .discover-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .discover-btn {
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+        
+        .discover-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        }
+        
+        .discover-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .peer-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .peer-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .peer-item:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+        
+        .peer-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .peer-info p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .send-btn {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .payment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input, .form-group select {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            flex: 1;
+        }
+        
+        .btn-send {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+            flex: 1;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .empty-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .wallet-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .wallet-option {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .wallet-option:hover {
+            background: #e9ecef;
+            border-color: #4ECDC4;
+            transform: translateY(-2px);
+        }
+        
+        .wallet-option h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        
+        .wallet-option p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .payment-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .payment-detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .payment-detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .payment-detail-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .payment-detail-value {
+            color: #666;
+            font-family: monospace;
+        }
+        
+        .payment-uri {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .logs {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>🚀 AirSign</h1>
+            <p>Send crypto like AirDrop</p>
+        </div>
+        
+        <div class="device-info">
+            <div class="device-name" id="deviceName">Loading...</div>
+            <div class="connection-status" id="connectionStatus">Initializing...</div>
+            <button class="discover-btn" id="reconnectBtn" onclick="reconnect()" style="display: none; margin-top: 10px; padding: 8px 16px; font-size: 0.9em;">
+                🔄 Reconnect
+            </button>
+        </div>
+        
+        <div class="main-controls">
+            <div class="discover-section">
+                <div style="margin-bottom: 15px;">
+                    <label for="transportType" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Connection Type:</label>
+                    <select id="transportType" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 1em;">
+                        <option value="websocket">🌐 Network Relay (WebSocket)</option>
+                        <option value="webrtc">🔗 Direct P2P (WebRTC)</option>
+                    </select>
+                </div>
+                
+                <button class="discover-btn" id="discoverBtn" onclick="toggleDiscovery()">
+                    🔍 Find Nearby Devices
+                </button>
+            </div>
+            
+            <div class="peer-list" id="peerList">
+                <div class="empty-state">
+                    <div class="empty-icon">📱</div>
+                    <p>No devices found nearby</p>
+                    <p style="font-size: 0.9em; margin-top: 5px;">Click "Find Nearby Devices" to start discovery</p>
+                </div>
+            </div>
+        </div>
+        
+                    <div class="logs" id="logs">
+                <div class="log-entry log-info">
+                    <strong>💡 AirSign SDK Integration Guide:</strong><br>
+                    <strong>With Wallet Apps:</strong> Auto-detects MetaMask, Phantom, Trust Wallet, etc.<br>
+                    <strong>Without Wallets:</strong> Provides payment URI and manual instructions<br>
+                    <strong>Web Integration:</strong> Use Web3 APIs for browser-based payments<br>
+                    <strong>Mobile Apps:</strong> Deep-link to installed wallet apps<br>
+                    <em>See console logs below for real-time integration examples...</em>
+                </div>
+            </div>
+    </div>
+    
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💰 Send Crypto Payment</h2>
+                <p>To: <span id="selectedPeerName"></span></p>
+            </div>
+            
+            <form class="payment-form" onsubmit="sendPayment(event)">
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="amount" step="0.000001" placeholder="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Currency</label>
+                    <select id="currency" required>
+                        <option value="BTC">Bitcoin (BTC)</option>
+                        <option value="ETH">Ethereum (ETH)</option>
+                        <option value="USDC">USD Coin (USDC)</option>
+                        <option value="SOL">Solana (SOL)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Wallet Address</label>
+                    <input type="text" id="walletAddress" placeholder="Your receiving address" required>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="discover-btn btn-cancel" onclick="closePaymentModal()">Cancel</button>
+                    <button type="submit" class="discover-btn btn-send">Send Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Payment Request Received Modal -->
+    <div class="payment-modal" id="paymentRequestModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💰 Payment Request Received</h2>
+                <p>From: <span id="senderName"></span></p>
+            </div>
+            
+            <div class="payment-details" id="paymentDetails">
+                <!-- Payment details will be populated here -->
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="discover-btn btn-cancel" onclick="declinePayment()">❌ Decline</button>
+                <button type="button" class="discover-btn btn-send" onclick="acceptPayment()">✅ Accept & Open Wallet</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="airsign-browser.js"></script>
+    <script>
+        // Global state
+        let airSignSDK = null;
+        let ws = null;
+        let webrtcTransport = null;
+        let discoveredPeers = new Map();
+        let isDiscovering = false;
+        let deviceName = '';
+        let selectedPeer = null;
+        
+        // Connect to WebSocket server
+        function connectWebSocket() {
+            try {
+                const wsUrl = window.location.hostname === 'localhost' ? 
+                    'ws://localhost:3001' : 
+                    `ws://${window.location.hostname}:3001`;
+                
+                log(`🔌 Connecting to ${wsUrl}...`, 'info');
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = () => {
+                    log('🌐 Connected to network', 'success');
+                    updateConnectionStatus('Connected to AirSign Network');
+                    
+                    // Announce device
+                    if (airSignSDK && airSignSDK.isReady && deviceName) {
+                        ws.send(JSON.stringify({
+                            type: 'announce',
+                            deviceName: deviceName,
+                            capabilities: ['crypto-payments', 'webrtc'],
+                            publicKey: airSignSDK.getPublicKey(),
+                            signature: 'fallback_signature',
+                            timestamp: Date.now(),
+                            version: '1.0.0'
+                        }));
+                    }
+                };
+                
+                ws.onmessage = handleWebSocketMessage;
+                
+                ws.onclose = (event) => {
+                    log(`❌ Disconnected from network (code: ${event.code})`, 'error');
+                    updateConnectionStatus('Disconnected');
+                    
+                    // Auto-reconnect after 3 seconds
+                    setTimeout(() => {
+                        if (!ws || ws.readyState === WebSocket.CLOSED) {
+                            log('🔄 Attempting to reconnect...', 'info');
+                            connectWebSocket();
+                        }
+                    }, 3000);
+                };
+                
+                ws.onerror = (error) => {
+                    log(`❌ Connection error: ${error.type || 'WebSocket error'}`, 'error');
+                    updateConnectionStatus('Connection Error');
+                };
+                
+            } catch (error) {
+                log(`❌ WebSocket connection failed: ${error.message}`, 'error');
+                updateConnectionStatus('Connection Failed');
+            }
+        }
+        
+        // Initialize everything
+        async function init() {
+            try {
+                // Initialize SDK
+                airSignSDK = new AirSignBrowser();
+                await airSignSDK.init();
+                
+                // Generate device name
+                const deviceNames = [
+                    "Alice's iPhone", "Bob's MacBook", "Charlie's Pixel", "Diana's iPad",
+                    "Emma's Surface", "Frank's Galaxy", "Grace's iPhone", "Henry's Laptop",
+                    "Ivan's Desktop", "Julia's Tablet", "Kevin's Phone", "Luna's Device"
+                ];
+                deviceName = deviceNames[Math.floor(Math.random() * deviceNames.length)];
+                document.getElementById('deviceName').textContent = deviceName;
+                
+                // Connect to WebSocket server
+                connectWebSocket();
+                
+            } catch (error) {
+                log(`❌ Initialization failed: ${error.message}`, 'error');
+                updateConnectionStatus('Initialization Failed');
+            }
+        }
+        
+        function handleWebSocketMessage(event) {
+            try {
+                const message = JSON.parse(event.data);
+                
+                switch (message.type) {
+                    case 'peer-list':
+                        updatePeerList(message.peers);
+                        break;
+                        
+                    case 'encrypted-payment':
+                        handleIncomingPayment(message);
+                        break;
+                        
+                    default:
+                        log(`📨 Received: ${message.type}`, 'info');
+                }
+            } catch (error) {
+                log(`❌ Message handling error: ${error.message}`, 'error');
+            }
+        }
+        
+        function toggleDiscovery() {
+            const btn = document.getElementById('discoverBtn');
+            const transportType = document.getElementById('transportType').value;
+            
+            if (!isDiscovering) {
+                startDiscovery(transportType);
+                btn.textContent = '⏹️ Stop Discovery';
+                btn.style.background = 'linear-gradient(45deg, #dc3545, #ff6b6b)';
+            } else {
+                stopDiscovery();
+                btn.textContent = '🔍 Find Nearby Devices';
+                btn.style.background = 'linear-gradient(45deg, #4ECDC4, #44A08D)';
+            }
+            
+            isDiscovering = !isDiscovering;
+        }
+        
+        function startDiscovery(transportType = 'websocket') {
+            log(`🔍 Starting device discovery via ${transportType}...`, 'info');
+            
+            if (transportType === 'websocket') {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'discover' }));
+                }
+            } else if (transportType === 'webrtc') {
+                log('🌐 WebRTC P2P discovery not yet implemented in clean demo', 'info');
+                log('💡 Use the full demo (index.html) for WebRTC functionality', 'info');
+            }
+        }
+        
+        function stopDiscovery() {
+            log('⏹️ Stopped discovery', 'info');
+            discoveredPeers.clear();
+            updatePeerList([]);
+        }
+        
+        function updatePeerList(peers) {
+            const peerListElement = document.getElementById('peerList');
+            discoveredPeers.clear();
+            
+            if (peers.length === 0) {
+                peerListElement.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📱</div>
+                        <p>No devices found nearby</p>
+                        <p style="font-size: 0.9em; margin-top: 5px;">Make sure other devices are running AirSign</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            peerListElement.innerHTML = peers.map(peer => {
+                discoveredPeers.set(peer.id, peer);
+                return `
+                    <div class="peer-item" onclick="selectPeer('${peer.id}')">
+                        <div class="peer-info">
+                            <h3>${peer.name}</h3>
+                            <p>💎 Crypto enabled • 🌐 ${peer.capabilities.includes('webrtc') ? 'P2P' : 'Network'}</p>
+                        </div>
+                        <button class="send-btn" onclick="event.stopPropagation(); openPaymentModal('${peer.id}')">
+                            💰 Send
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            log(`📱 Found ${peers.length} device(s)`, 'success');
+        }
+        
+        function selectPeer(peerId) {
+            const peer = discoveredPeers.get(peerId);
+            if (peer) {
+                log(`📱 Selected ${peer.name}`, 'info');
+                selectedPeer = peer;
+            }
+        }
+        
+        function openPaymentModal(peerId) {
+            const peer = discoveredPeers.get(peerId);
+            if (peer) {
+                selectedPeer = peer;
+                document.getElementById('selectedPeerName').textContent = peer.name;
+                document.getElementById('paymentModal').style.display = 'flex';
+            }
+        }
+        
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+            selectedPeer = null;
+        }
+        
+        async function sendPayment(event) {
+            event.preventDefault();
+            
+            if (!selectedPeer) {
+                log('❌ No peer selected', 'error');
+                return;
+            }
+            
+            const amount = document.getElementById('amount').value;
+            const currency = document.getElementById('currency').value;
+            const walletAddress = document.getElementById('walletAddress').value;
+            
+            try {
+                // Create payment request
+                const paymentRequest = {
+                    amount: parseFloat(amount),
+                    currency: currency,
+                    recipient: walletAddress,
+                    from: deviceName,
+                    timestamp: Date.now()
+                };
+                
+                // Create currency-specific payment URI
+                const paymentUri = createPaymentURI(currency, walletAddress, amount, deviceName);
+                const encryptedPayment = await airSignSDK.encryptPaymentRequest(
+                    paymentUri,
+                    selectedPeer.publicKey
+                );
+                
+                // Send via WebSocket
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        type: 'encrypted-payment',
+                        to: selectedPeer.id,
+                        encryptedData: encryptedPayment
+                    }));
+                    
+                    log(`💰 Sent ${amount} ${currency} request to ${selectedPeer.name}`, 'success');
+                    closePaymentModal();
+                }
+                
+            } catch (error) {
+                log(`❌ Payment send failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Currency and wallet configuration
+        const CURRENCY_CONFIG = {
+            BTC: {
+                scheme: 'bitcoin',
+                walletApps: [
+                    { 
+                        name: 'Electrum', 
+                        deepLink: 'electrum:', 
+                        webLink: 'https://electrum.org/' 
+                    },
+                    { 
+                        name: 'BlueWallet', 
+                        deepLink: 'bluewallet:', 
+                        webLink: 'https://bluewallet.io/' 
+                    }
+                ]
+            },
+            ETH: {
+                scheme: 'ethereum',
+                walletApps: [
+                    { 
+                        name: 'MetaMask', 
+                        deepLink: null, // MetaMask uses Web3 API, not deep links
+                        webLink: 'https://metamask.io/',
+                        web3: true 
+                    },
+                    { 
+                        name: 'Trust Wallet', 
+                        deepLink: 'trust://send',
+                        webLink: 'https://trustwallet.com/' 
+                    },
+                    { 
+                        name: 'Coinbase Wallet', 
+                        deepLink: 'cbwallet://send',
+                        webLink: 'https://wallet.coinbase.com/' 
+                    }
+                ]
+            },
+            USDC: {
+                scheme: 'ethereum', // USDC is an ERC-20 token
+                contractAddress: '0xa0b86a33e6b98b8db5bf6acdc21c1b24c17ac7b8f',
+                walletApps: [
+                    { 
+                        name: 'MetaMask', 
+                        deepLink: null,
+                        webLink: 'https://metamask.io/',
+                        web3: true 
+                    },
+                    { 
+                        name: 'Trust Wallet', 
+                        deepLink: 'trust://send',
+                        webLink: 'https://trustwallet.com/' 
+                    }
+                ]
+            },
+            SOL: {
+                scheme: 'solana',
+                walletApps: [
+                    { 
+                        name: 'Phantom', 
+                        deepLink: 'phantom://send',
+                        webLink: 'https://phantom.app/' 
+                    },
+                    { 
+                        name: 'Solflare', 
+                        deepLink: 'solflare://send',
+                        webLink: 'https://solflare.com/' 
+                    }
+                ]
+            }
+        };
+        
+        function createPaymentURI(currency, address, amount, from) {
+            const config = CURRENCY_CONFIG[currency];
+            if (!config) {
+                // Fallback to generic URI
+                return `pay:${address}?amount=${amount}&currency=${currency}&label=Payment from ${from}`;
+            }
+            
+            const scheme = config.scheme;
+            const label = encodeURIComponent(`Payment from ${from}`);
+            
+            // Create currency-specific URI
+            switch (currency) {
+                case 'BTC':
+                    return `${scheme}:${address}?amount=${amount}&label=${label}`;
+                    
+                case 'ETH':
+                    return `${scheme}:${address}@1?value=${amount}e18&label=${label}`;
+                    
+                case 'USDC':
+                    // USDC contract address on Ethereum mainnet
+                    const usdcContract = '0xa0b86a33e6b98b8db5bf6acdc21c1b24c17ac7b8f';
+                    return `${scheme}:${usdcContract}@1/transfer?address=${address}&uint256=${amount}e6`;
+                    
+                case 'SOL':
+                    return `${scheme}:${address}?amount=${amount}&label=${label}`;
+                    
+                default:
+                    return `${scheme}:${address}?amount=${amount}&label=${label}`;
+            }
+        }
+        
+        // Global variables for payment handling
+        let currentPaymentRequest = null;
+        
+        async function handleIncomingPayment(message) {
+            try {
+                const decryptedPayment = await airSignSDK.decryptMessage(message.encryptedData);
+                
+                log(`💰 Received payment request: ${decryptedPayment.uri}`, 'success');
+                
+                // Store payment request data
+                currentPaymentRequest = {
+                    uri: decryptedPayment.uri,
+                    from: message.from || 'Unknown Device',
+                    timestamp: decryptedPayment.timestamp || Date.now()
+                };
+                
+                // Parse payment URI for better display
+                const paymentInfo = parsePaymentURI(decryptedPayment.uri);
+                
+                // Show payment request modal
+                showPaymentRequestModal(paymentInfo);
+                
+            } catch (error) {
+                log(`❌ Payment decryption failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function parsePaymentURI(uri) {
+            try {
+                // Parse URI format: scheme:address?params
+                const [scheme, rest] = uri.split(':');
+                const [addressPart, paramString] = rest.split('?');
+                
+                const params = new URLSearchParams(paramString || '');
+                
+                // Handle different currency schemes
+                let currency = scheme.toUpperCase();
+                let amount = params.get('amount') || params.get('value') || 'Not specified';
+                
+                // Special handling for Ethereum values (convert from wei)
+                if (scheme === 'ethereum' && params.get('value')) {
+                    const weiValue = params.get('value');
+                    if (weiValue.includes('e18')) {
+                        amount = weiValue.replace('e18', '') + ' ETH';
+                    } else if (weiValue.includes('e6')) {
+                        amount = weiValue.replace('e6', '') + ' USDC';
+                        currency = 'USDC';
+                    }
+                }
+                
+                return {
+                    scheme: scheme,
+                    currency: currency,
+                    address: addressPart,
+                    amount: amount,
+                    label: params.get('label') || 'Payment',
+                    message: params.get('message') || '',
+                    fullUri: uri
+                };
+            } catch (error) {
+                return {
+                    scheme: 'unknown',
+                    currency: 'UNKNOWN',
+                    address: 'Invalid URI',
+                    amount: 'Unknown',
+                    label: 'Payment',
+                    message: '',
+                    fullUri: uri
+                };
+            }
+        }
+        
+        function showPaymentRequestModal(paymentInfo) {
+            // Update modal content
+            document.getElementById('senderName').textContent = currentPaymentRequest.from;
+            
+            const paymentDetails = document.getElementById('paymentDetails');
+            paymentDetails.innerHTML = `
+                <div class="payment-detail-item">
+                    <span class="payment-detail-label">💰 Amount:</span>
+                    <span class="payment-detail-value">${paymentInfo.amount}</span>
+                </div>
+                <div class="payment-detail-item">
+                    <span class="payment-detail-label">💎 Currency:</span>
+                    <span class="payment-detail-value">${paymentInfo.currency}</span>
+                </div>
+                <div class="payment-detail-item">
+                    <span class="payment-detail-label">📧 To Address:</span>
+                    <span class="payment-detail-value">${paymentInfo.address}</span>
+                </div>
+                <div class="payment-detail-item">
+                    <span class="payment-detail-label">🏷️ Label:</span>
+                    <span class="payment-detail-value">${paymentInfo.label}</span>
+                </div>
+                <div class="payment-detail-item">
+                    <span class="payment-detail-label">📱 Payment URI:</span>
+                    <div class="payment-uri">${paymentInfo.fullUri}</div>
+                </div>
+            `;
+            
+            // Show modal
+            document.getElementById('paymentRequestModal').style.display = 'flex';
+        }
+        
+        function acceptPayment() {
+            if (!currentPaymentRequest) return;
+            
+            log('✅ Payment request accepted - opening wallet...', 'success');
+            
+            // Parse the payment info to determine currency
+            const paymentInfo = parsePaymentURI(currentPaymentRequest.uri);
+            const currency = detectCurrency(paymentInfo.scheme);
+            
+            // Try to open appropriate wallet app
+            openWalletApp(currency, currentPaymentRequest.uri);
+            
+            closePaymentRequestModal();
+        }
+        
+        function detectCurrency(scheme) {
+            switch (scheme) {
+                case 'bitcoin': return 'BTC';
+                case 'ethereum': return 'ETH';
+                case 'solana': return 'SOL';
+                default: return 'BTC'; // fallback
+            }
+        }
+        
+        function openWalletApp(currency, paymentUri) {
+            const config = CURRENCY_CONFIG[currency];
+            if (!config) {
+                showManualPaymentOptions(paymentUri);
+                return;
+            }
+            
+            // Parse payment details
+            const paymentInfo = parsePaymentURI(paymentUri);
+            
+            // Show wallet selection modal
+            showWalletSelectionModal(currency, paymentInfo, config.walletApps);
+        }
+        
+        function showWalletSelectionModal(currency, paymentInfo, walletApps) {
+            // Create wallet selection modal with simpler approach
+            const modal = document.createElement('div');
+            modal.className = 'payment-modal';
+            modal.style.display = 'flex';
+            modal.id = 'walletSelectionModal';
+            
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+            
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h2>💰 Choose Payment Method</h2>
+                    <p>Complete your ${currency} payment (${paymentInfo.amount})</p>
+                </div>
+                
+                <div class="wallet-options">
+                    <div class="wallet-option" onclick="handleWalletChoice('metamask', '${currency}')">
+                        <h4>🦊 MetaMask</h4>
+                        <p>Browser Extension</p>
+                    </div>
+                    
+                    <div class="wallet-option" onclick="handleWalletChoice('trust', '${currency}')">
+                        <h4>📱 Trust Wallet</h4>
+                        <p>Mobile App</p>
+                    </div>
+                    
+                    <div class="wallet-option" onclick="handleWalletChoice('phantom', '${currency}')">
+                        <h4>� Phantom</h4>
+                        <p>Solana Wallet</p>
+                    </div>
+                    
+                    <div class="wallet-option" onclick="handleWalletChoice('manual', '${currency}')">
+                        <h4>📋 Manual</h4>
+                        <p>Copy payment details</p>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="discover-btn btn-cancel" onclick="closeWalletModal()">Cancel</button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            window.currentWalletModal = modal;
+            window.currentPaymentInfo = paymentInfo;
+        }
+        
+        function handleWalletChoice(walletType, currency) {
+            const paymentInfo = window.currentPaymentInfo;
+            closeWalletModal();
+            
+            switch (walletType) {
+                case 'metamask':
+                    openMetaMaskDirectly(paymentInfo);
+                    break;
+                case 'trust':
+                    openTrustWallet(paymentInfo);
+                    break;
+                case 'phantom':
+                    openPhantomWallet(paymentInfo);
+                    break;
+                case 'manual':
+                    showManualPaymentOptions(paymentInfo.fullUri);
+                    break;
+                default:
+                    showManualPaymentOptions(paymentInfo.fullUri);
+            }
+        }
+        
+        async function openMetaMaskDirectly(paymentInfo) {
+            try {
+                log('🦊 Checking for MetaMask...', 'info');
+                
+                if (typeof window.ethereum === 'undefined') {
+                    log('❌ MetaMask not detected', 'error');
+                    log('💡 Install MetaMask extension or use manual payment', 'info');
+                    window.open('https://metamask.io/download/', '_blank');
+                    return;
+                }
+                
+                log('✅ MetaMask detected, requesting connection...', 'success');
+                
+                // Request account access
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                if (accounts.length === 0) {
+                    log('❌ No MetaMask accounts available', 'error');
+                    return;
+                }
+                
+                log(`🔗 Connected to MetaMask account: ${accounts[0].substring(0, 8)}...`, 'success');
+                
+                // Convert amount to wei (assuming ETH)
+                const amountInWei = Math.floor(parseFloat(paymentInfo.amount) * 1e18);
+                const hexValue = '0x' + amountInWei.toString(16);
+                
+                // Prepare transaction
+                const transactionParameters = {
+                    to: paymentInfo.address,
+                    from: accounts[0],
+                    value: hexValue,
+                    gas: '0x5208', // 21000 gas for ETH transfer
+                };
+                
+                log('📝 Sending transaction to MetaMask...', 'info');
+                log(`💰 Amount: ${paymentInfo.amount} ETH`, 'info');
+                log(`📧 To: ${paymentInfo.address}`, 'info');
+                
+                // Send transaction
+                const txHash = await window.ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [transactionParameters],
+                });
+                
+                log(`✅ Transaction sent! Hash: ${txHash}`, 'success');
+                log('🔍 Check transaction status in MetaMask or block explorer', 'info');
+                
+            } catch (error) {
+                log(`❌ MetaMask error: ${error.message}`, 'error');
+                
+                if (error.code === 4001) {
+                    log('💡 Transaction was rejected by user', 'info');
+                } else {
+                    log('💡 Try manual payment method', 'info');
+                    showManualPaymentOptions(paymentInfo.fullUri);
+                }
+            }
+        }
+        
+        function openTrustWallet(paymentInfo) {
+            const trustUrl = `https://link.trustwallet.com/send?coin=60&address=${paymentInfo.address}&amount=${paymentInfo.amount}`;
+            
+            log('📱 Opening Trust Wallet...', 'info');
+            window.open(trustUrl, '_blank');
+            
+            // Fallback message
+            setTimeout(() => {
+                log('💡 If Trust Wallet didn\'t open, copy the payment details manually', 'info');
+                copyToClipboard(paymentInfo.fullUri);
+            }, 2000);
+        }
+        
+        function openPhantomWallet(paymentInfo) {
+            // Phantom deep link format
+            const phantomUrl = `https://phantom.app/ul/v1/send?recipient=${paymentInfo.address}&amount=${paymentInfo.amount}`;
+            
+            log('👻 Opening Phantom Wallet...', 'info');
+            window.open(phantomUrl, '_blank');
+            
+            // Fallback message
+            setTimeout(() => {
+                log('� If Phantom didn\'t open, copy the payment details manually', 'info');
+                copyToClipboard(paymentInfo.fullUri);
+            }, 2000);
+        }
+        
+        function showManualPaymentOptions(paymentUri) {
+            closeWalletModal();
+            
+            log('📋 Manual payment instructions:', 'info');
+            log('1. Copy the payment details below', 'info');
+            log('2. Open your wallet app manually', 'info');
+            log('3. Paste or enter the payment details', 'info');
+            log('4. Confirm the transaction', 'info');
+            
+            copyToClipboard(paymentUri);
+            
+            // Show detailed payment info
+            const paymentInfo = parsePaymentURI(paymentUri);
+            log(`💰 Amount: ${paymentInfo.amount}`, 'info');
+            log(`📧 To Address: ${paymentInfo.address}`, 'info');
+            log(`📱 Full URI: ${paymentUri}`, 'info');
+        }
+        
+        function closeWalletModal() {
+            if (window.currentWalletModal) {
+                document.body.removeChild(window.currentWalletModal);
+                window.currentWalletModal = null;
+            }
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                log('📋 Payment URI copied to clipboard', 'success');
+                log('💡 Paste in your wallet app to complete payment', 'info');
+            }).catch(() => {
+                log('📋 Could not copy to clipboard. URI: ' + text, 'info');
+            });
+        }
+        
+        function declinePayment() {
+            if (!currentPaymentRequest) return;
+            
+            log('❌ Payment request declined', 'info');
+            closePaymentRequestModal();
+        }
+        
+        function closePaymentRequestModal() {
+            document.getElementById('paymentRequestModal').style.display = 'none';
+            currentPaymentRequest = null;
+        }
+        
+        function updateConnectionStatus(status) {
+            document.getElementById('connectionStatus').textContent = status;
+            const reconnectBtn = document.getElementById('reconnectBtn');
+            
+            if (status.includes('Disconnected') || status.includes('Error') || status.includes('Failed')) {
+                reconnectBtn.style.display = 'inline-block';
+            } else {
+                reconnectBtn.style.display = 'none';
+            }
+        }
+        
+        function reconnect() {
+            log('🔄 Manual reconnect triggered', 'info');
+            if (ws) {
+                ws.close();
+            }
+            connectWebSocket();
+        }
+        
+        function log(message, type = 'info') {
+            const logsElement = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            
+            logsElement.appendChild(logEntry);
+            logsElement.scrollTop = logsElement.scrollHeight;
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', init);
+        
+        // Handle form reset and modal clicks
+        document.getElementById('paymentModal').addEventListener('click', (e) => {
+            if (e.target.id === 'paymentModal') {
+                closePaymentModal();
+            }
+        });
+        
+        document.getElementById('paymentRequestModal').addEventListener('click', (e) => {
+            if (e.target.id === 'paymentRequestModal') {
+                closePaymentRequestModal();
+            }
+        });
+    </script>
+</body>
+</html>

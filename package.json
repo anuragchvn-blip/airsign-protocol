@@ -1,0 +1,60 @@
+{
+  "name": "airsign-protocol",
+  "version": "1.0.0",
+  "description": "AirDrop for Web3 - Secure nearby crypto & data exchange protocol",
+  "private": true,
+  "workspaces": [
+    "sdk-core",
+    "web-demo"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=sdk-core",
+    "dev": "npm run dev --workspace=web-demo",
+    "test": "npm run test --workspace=sdk-core",
+    "test:coverage": "npm run test --workspace=sdk-core -- --coverage",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "clean": "npm run clean --workspace=sdk-core",
+    "demo": "npm run start --workspace=web-demo",
+    "publish:sdk": "npm run build --workspace=sdk-core && npm publish --workspace=sdk-core",
+    "publish:demo": "npm publish --workspace=web-demo"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-security": "^1.7.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anuragchvn-blip/airsign-protocol.git"
+  },
+  "keywords": [
+    "web3",
+    "crypto",
+    "protocol",
+    "peer-to-peer",
+    "airdrop",
+    "nearby",
+    "payment",
+    "ethereum",
+    "bitcoin",
+    "security",
+    "privacy",
+    "open-source"
+  ],
+  "author": "AirSign Protocol Contributors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/anuragchvn-blip/airsign-protocol/issues"
+  },
+  "homepage": "https://github.com/anuragchvn-blip/airsign-protocol#readme"
+}
