@@ -22,7 +22,7 @@ module.exports = {
     'no-console': 'warn',
     'prefer-const': 'error',
     'no-var': 'error',
-    'no-unused-vars': 'warn'
+    'no-unused-vars': 'off' // Disabled for public API enum types
   },
   overrides: [
     {

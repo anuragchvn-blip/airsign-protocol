@@ -262,6 +262,7 @@ export async function verifySenderSignature(
 ): Promise<boolean> {
   // TODO: Implement signature verification with @noble/secp256k1 and @noble/ed25519
   // For now, return false as verification is not implemented
+  // eslint-disable-next-line no-console
   console.warn(`Signature verification not implemented for ${scheme}`);
   return false;
   
